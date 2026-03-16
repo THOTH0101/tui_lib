@@ -1,36 +1,13 @@
-from constant import TABLE_HEADING
-from textual.app import App, ComposeResult
-from textual.widgets import DataTable
-
-books = [
-    (
-        "The Great Gatsby",
-        "F. Scott Fitzgerald",
-        "2023-10-01",
-        "1.2 MB",
-        "Scribner",
-        "1925",
-    ),
-    (
-        "Neuromancer",
-        "William Gibson",
-        "2023-11-15",
-        "0.8 MB",
-    ),
-    ("Foundation", "Isaac Asimov", "2024-01-05", "1.5 MB", "Gnome Press", "1951"),
-]
+from components.library import Library
+from library_operations import get_lib_content
 
 
-class Library(App):
-    def compose(self) -> ComposeResult:
-        yield DataTable()
-
-    def on_mount(self) -> None:
-        table = self.query_one(DataTable)
-        table.add_columns(*TABLE_HEADING)
-        table.add_rows(books)
+def main():
+    # lib = Library()
+    # lib.run()
+    lib_content = get_lib_content()
+    print(lib_content)
 
 
-app = Library()
 if __name__ == "__main__":
-    app.run()
+    main()
