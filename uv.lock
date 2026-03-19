@@ -135,6 +135,12 @@ wheels = [
 ]
 
 [[package]]
+name = "epub-meta"
+version = "0.0.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ab/5d/1c2f0f44534d2485beb6b6fa8d11863fc63e780dee3cb76d9028eccf5f62/epub_meta-0.0.7.tar.gz", hash = "sha256:9d9c6afeaef796105a77d0aef33a1c943ccd91cccb2cb7716f59ad149819a4e9", size = 7352, upload-time = "2018-09-08T02:36:20.261Z" }
+
+[[package]]
 name = "frozenlist"
 version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -534,6 +540,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pypdf"
+version = "6.9.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f9/fb/dc2e8cb006e80b0020ed20d8649106fe4274e82d8e756ad3e24ade19c0df/pypdf-6.9.1.tar.gz", hash = "sha256:ae052407d33d34de0c86c5c729be6d51010bf36e03035a8f23ab449bca52377d", size = 5311551, upload-time = "2026-03-17T10:46:07.876Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f9/f4/75543fa802b86e72f87e9395440fe1a89a6d149887e3e55745715c3352ac/pypdf-6.9.1-py3-none-any.whl", hash = "sha256:f35a6a022348fae47e092a908339a8f3dc993510c026bb39a96718fc7185e89f", size = 333661, upload-time = "2026-03-17T10:46:06.286Z" },
+]
+
+[[package]]
 name = "rich"
 version = "14.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -601,12 +616,16 @@ name = "tui-lib"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "epub-meta" },
+    { name = "pypdf" },
     { name = "textual" },
     { name = "textual-dev" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "epub-meta", specifier = ">=0.0.7" },
+    { name = "pypdf", specifier = ">=6.9.1" },
     { name = "textual", specifier = ">=8.1.1" },
     { name = "textual-dev", specifier = ">=1.8.0" },
 ]
