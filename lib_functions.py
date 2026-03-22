@@ -14,53 +14,73 @@ class EbookTypes(Enum):
     PDF = "application/pdf"
 
 
-def get_lib_content():
-    if os.path.exists(LIB_PATH):
-        content = os.listdir(LIB_PATH)
-        return content
-    os.mkdir(LIB_PATH)
-
-
-def add_ebook_recursive(file_path):
+def get_books(file_path):
     if not os.path.exists(file_path):
-        return f"Error: {file_path} does not exist"
+        os.mkdir(file_path)
+        return
+
+    book_list = []
+    contents = os.listdir(file_path)
+    for content in contents:
+        content_path = os.path.join(file_path, content)
+        if os.path.isfile(content_path):
+            if not is_valid_ebook(content_path):
+                continue
+            book_list.append(get_book_info(content_path))
+        else:
+            print(f"Directory: {content_path}")
+            new_list = get_books(content_path)
+            if new_list:
+                book_list.extend(new_list)
+    return book_list
+
+
+def add_ebook_recursive(file_path, verbose):
+    if not os.path.exists(file_path):
+        print(f"Error: {file_path} does not exist")
+        return
 
     if os.path.isfile(file_path):
-        return add_ebook(file_path)
+        add_ebook(file_path, verbose)
+        return
 
     contents = os.listdir(file_path)
     for content in contents:
         content_path = os.path.join(file_path, content)
 
         if os.path.isfile(content_path):
-            if is_valid_ebook(content_path):
-                print(add_ebook(content_path))
-            continue
+            if not is_valid_ebook(content_path):
+                continue
+            add_ebook(content_path, verbose)
         else:
-            new_path = os.path.join(file_path, content)
-            print(f"Directory: {new_path}")
-            add_ebook_recursive(new_path)
+            if verbose:
+                print(f"Directory: {content_path}")
+            add_ebook_recursive(content_path, verbose)
 
 
-def add_ebook(file_path):
+def add_ebook(file_path, verbose):
     if not os.path.exists(file_path):
-        return f"Error: {file_path} does not exist"
+        print(f"Error: {file_path} does not exist")
+        return
 
+    # get ebook type
     mime_type, _ = mimetypes.guess_type(file_path)
 
-    # add ebook base to library
+    # add ebook to library
     if mime_type == EbookTypes.EPUB.value:
         meta_data = epub_meta.get_epub_metadata(file_path)
-        authors = ",".join(meta_data["authors"]) or "Unknown"
-        title = meta_data["title"].replace("/", " ") or "Unknown"
+        authors = ",".join(meta_data.authors) or "Unknown"
+        title = meta_data.title.replace("/", " ") or "Unknown"
         dest_path = f"{LIB_PATH}/{authors}/{title}/{title} - {authors}.epub"
 
-        print(f"Copying ebook file from {file_path} to {dest_path}")
+        if verbose:
+            print(f"Copying ebook file from {file_path} to {dest_path}")
         dir_name = os.path.dirname(dest_path)
         if dir_name != "" and not os.path.exists(dir_name):
             os.makedirs(dir_name)
         shutil.copy2(file_path, dest_path)
-        return f"Success: {file_path} added"
+        print(f"Success: {file_path} added")
+        return
 
     if mime_type == EbookTypes.PDF.value:
         meta_data = PdfReader(file_path).metadata
@@ -68,14 +88,16 @@ def add_ebook(file_path):
         title = meta_data.title.replace("/", " ") or "Unknown"
         dest_path = f"{LIB_PATH}/{authors}/{title}/{title} - {authors}.pdf"
 
-        print(f"Copying ebook file from {file_path} to {dest_path}")
+        if verbose:
+            print(f"Copying ebook file from {file_path} to {dest_path}")
         dir_name = os.path.dirname(dest_path)
         if dir_name != "" and not os.path.exists(dir_name):
             os.makedirs(dir_name)
         shutil.copy2(file_path, dest_path)
-        return f"Success: {file_path} added"
+        print(f"Success: {file_path} added")
+        return
 
-    return "Error: invalid ebook type"
+    print("Error: invalid ebook type")
 
 
 def is_ebook_extension(file_path):
@@ -99,3 +121,24 @@ def is_valid_ebook(file_path):
     ]
 
     return mime_type in EBOOK_MIMES
+
+
+def get_book_info(file_path):
+    mime_type, _ = mimetypes.guess_type(file_path)
+    if mime_type == EbookTypes.EPUB.value:
+        meta_data = epub_meta.get_epub_metadata(file_path)
+        title = meta_data.title.replace("/", " ") or "Unknown"
+        authors = ",".join(meta_data.authors) or "Unknown"
+        size = meta_data.file_size_in_bytes / 1000.0 or "Unknown"
+        publisher = meta_data.publisher or "Unknown"
+        published = meta_data.publication_date or "Unknown"
+        return title, authors, size, publisher, published
+
+    if mime_type == EbookTypes.PDF.value:
+        meta_data = PdfReader(file_path).metadata
+        title = meta_data.title.replace("/", " ") or "Unknown"
+        authors = meta_data.author or "Unknown"
+        size = "Unknown"
+        publisher = meta_data.creator or meta_data.producer or "Unknown"
+        published = meta_data.creation_date or "Unknown"
+        return title, authors, size, publisher, published

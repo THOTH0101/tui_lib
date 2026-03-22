@@ -1,5 +1,6 @@
 import argparse
 
+from library import Library
 from lib_functions import add_ebook_recursive
 
 
@@ -10,11 +11,13 @@ def main():
         "--verbose", action="store_true", help="enable verbose output of processes"
     )
     args = parser.parse_args()
-    message = ""
 
     if args.path:
-        message = add_ebook_recursive(args.path)
-    print(message)
+        add_ebook_recursive(args.path, args.verbose)
+        exit(0)
+
+    lib = Library()
+    lib.run()
 
 
 if __name__ == "__main__":
