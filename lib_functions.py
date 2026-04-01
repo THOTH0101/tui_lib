@@ -4,6 +4,7 @@ import mimetypes
 import epub_meta
 
 from enum import Enum
+from datetime import datetime
 from pathlib import Path
 from constant import LIB_PATH
 from pypdf import PdfReader
@@ -33,6 +34,47 @@ def get_books(file_path):
             if new_list:
                 book_list.extend(new_list)
     return book_list
+
+
+def remove_empty_dir(file_path):
+    contents = os.listdir(file_path)
+    for content in contents:
+        content_path = os.path.join(file_path, content)
+        path = Path(content_path)
+        if any(path.iterdir()):
+            print(f"Error: {file_path} is not empty")
+            return
+        path.rmdir()
+    path = Path(file_path)
+    path.rmdir()
+
+
+def clear_lib_dir():
+    contents = os.listdir(LIB_PATH)
+    for content in contents:
+        content_path = os.path.join(LIB_PATH, content)
+        remove_empty_dir(content_path)
+
+
+def remove_ebook_recursive():
+    contents = os.listdir(LIB_PATH)
+    for content in contents:
+        content_path = os.path.join(LIB_PATH, content)
+        remove_ebook(content_path)
+
+
+def remove_ebook(file_path):
+    if not os.path.exists(file_path):
+        print(f"Error: {file_path} does not exist")
+        return
+
+    if os.path.isfile(file_path):
+        print("Error: invalid ebook record")
+        return
+
+    shutil.rmtree(file_path)
+    clear_lib_dir()
+    print("Success: ebook deleted")
 
 
 def add_ebook_recursive(file_path, verbose):
@@ -129,16 +171,22 @@ def get_book_info(file_path):
         meta_data = epub_meta.get_epub_metadata(file_path)
         title = meta_data.title.replace("/", " ") or "Unknown"
         authors = ",".join(meta_data.authors) or "Unknown"
-        size = meta_data.file_size_in_bytes / 1000.0 or "Unknown"
+        size = meta_data.file_size_in_bytes / (1024 * 1024) or "Unknown"
         publisher = meta_data.publisher or "Unknown"
-        published = meta_data.publication_date or "Unknown"
+        published = "Unknown"
+        if meta_data.publication_date:
+            date = datetime.fromisoformat(meta_data.publication_date.split("T")[0])
+            published = date.strftime("%b %Y")
         return title, authors, size, publisher, published
 
     if mime_type == EbookTypes.PDF.value:
         meta_data = PdfReader(file_path).metadata
         title = meta_data.title.replace("/", " ") or "Unknown"
         authors = meta_data.author or "Unknown"
-        size = "Unknown"
+        size = Path(file_path).stat().st_size / (1024 * 1024) or "Unknown"
         publisher = meta_data.creator or meta_data.producer or "Unknown"
-        published = meta_data.creation_date or "Unknown"
+        published = "Unknown"
+        if meta_data.creation_date:
+            date = meta_data.creation_date
+            published = date.strftime("%b %Y")
         return title, authors, size, publisher, published
