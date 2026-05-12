@@ -77,14 +77,12 @@ def remove_ebook(file_path):
     print("Success: ebook deleted")
 
 
-def add_ebook_recursive(file_path, verbose):
+def add_ebook_recursive(file_path):
     if not os.path.exists(file_path):
-        print(f"Error: {file_path} does not exist")
-        return
+        return f"Error: {file_path} does not exist"
 
     if os.path.isfile(file_path):
-        add_ebook(file_path, verbose)
-        return
+        return add_ebook(file_path)
 
     contents = os.listdir(file_path)
     for content in contents:
@@ -93,17 +91,15 @@ def add_ebook_recursive(file_path, verbose):
         if os.path.isfile(content_path):
             if not is_valid_ebook(content_path):
                 continue
-            add_ebook(content_path, verbose)
+            add_ebook(content_path)
         else:
-            if verbose:
-                print(f"Directory: {content_path}")
-            add_ebook_recursive(content_path, verbose)
+            print(f"Directory: {content_path}")
+            add_ebook_recursive(content_path)
 
 
-def add_ebook(file_path, verbose):
+def add_ebook(file_path):
     if not os.path.exists(file_path):
-        print(f"Error: {file_path} does not exist")
-        return
+        return f"Error: {file_path} does not exist"
 
     # get ebook type
     mime_type, _ = mimetypes.guess_type(file_path)
@@ -115,14 +111,12 @@ def add_ebook(file_path, verbose):
         title = meta_data.title.replace("/", " ") or "Unknown"
         dest_path = f"{LIB_PATH}/{authors}/{title}/{title} - {authors}.epub"
 
-        if verbose:
-            print(f"Copying ebook file from {file_path} to {dest_path}")
+        print(f"Copying ebook file from {file_path} to {dest_path}")
         dir_name = os.path.dirname(dest_path)
         if dir_name != "" and not os.path.exists(dir_name):
             os.makedirs(dir_name)
         shutil.copy2(file_path, dest_path)
-        print(f"Success: {file_path} added")
-        return
+        return f"Success: {file_path} added"
 
     if mime_type == EbookTypes.PDF.value:
         meta_data = PdfReader(file_path).metadata
@@ -130,16 +124,14 @@ def add_ebook(file_path, verbose):
         title = meta_data.title.replace("/", " ") or "Unknown"
         dest_path = f"{LIB_PATH}/{authors}/{title}/{title} - {authors}.pdf"
 
-        if verbose:
-            print(f"Copying ebook file from {file_path} to {dest_path}")
+        print(f"Copying ebook file from {file_path} to {dest_path}")
         dir_name = os.path.dirname(dest_path)
         if dir_name != "" and not os.path.exists(dir_name):
             os.makedirs(dir_name)
         shutil.copy2(file_path, dest_path)
-        print(f"Success: {file_path} added")
-        return
+        return f"Success: {file_path} added"
 
-    print("Error: invalid ebook type")
+    return "Error: invalid ebook type"
 
 
 def is_ebook_extension(file_path):

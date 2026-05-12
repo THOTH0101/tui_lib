@@ -1,0 +1,31 @@
+ConfirmationDialog {
+    align: center middle;
+}
+
+TextInput {
+    align: center middle;
+  }
+
+#dialog {
+    width: 50;
+    height: auto;
+    border: round $primary;
+    background: $surface;
+    padding: 1;
+}
+
+#question {
+    width: 100%;
+    content-align: center middle;
+    margin-bottom: 1;
+    text-style: bold;
+}
+
+#confirm_options {
+    height: 5;
+    border: round $accent;
+}
+
+#input {
+  border: round $accent;
+}
