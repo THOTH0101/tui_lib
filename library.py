@@ -1,13 +1,10 @@
 from itertools import cycle
 from dialog import ConfirmationDialog
+from functions.lib_get_content import get_lib_content
+from functions.lib_remove_content import remove_ebook, remove_ebook_recursive
 from input import TextInput
 from rich.text import Text
 from constant import LIB_PATH, TABLE_HEADING
-from lib_functions import (
-    get_books,
-    remove_ebook,
-    remove_ebook_recursive,
-)
 from textual.reactive import reactive
 from textual.app import App, ComposeResult
 from textual.widgets import DataTable
@@ -27,7 +24,7 @@ class Library(App):
         ("j", "cursor_down", "Cursor down"),
         ("t", "toggle_dark", "Toggle dark mode"),
     ]
-    lib_content = reactive(get_books(LIB_PATH))
+    lib_content = reactive(get_lib_content())
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -81,7 +78,7 @@ class Library(App):
     def action_delete_ebook(self) -> None:
         table = self.query_one(DataTable)
 
-        def cofirm_check(should_delete: bool):
+        def confirm_check(should_delete: bool):
             if should_delete:
                 row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
                 row_data = table.get_row(row_key)
@@ -93,5 +90,5 @@ class Library(App):
 
         self.push_screen(
             ConfirmationDialog("Are you sure you want to delete this ebook?"),
-            cofirm_check,
+            confirm_check,
         )
