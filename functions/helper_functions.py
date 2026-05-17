@@ -5,6 +5,13 @@ from pathlib import Path
 from constant import LIB_PATH
 
 
+def format_long_str(text: str) -> str:
+    default_len = 40
+    if len(text) > default_len:
+        return f"{text[:default_len]}..."
+    return text
+
+
 def sanitize_path_part(part: str) -> str:
     chars_to_remove = ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]
     for char in chars_to_remove:

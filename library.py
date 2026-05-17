@@ -1,3 +1,4 @@
+from functions.lib_open_content import open_ebook
 from textual import work
 from dialog import ConfirmationDialog
 from functions.lib_add_content import add_ebook_recursive
@@ -35,6 +36,13 @@ class Library(App):
         table.add_columns(*TABLE_HEADING)
         table.cursor_type = "row"
         self.sync_lib_content()
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        file_path = event.row_key.value
+
+        if file_path:
+            success, message = open_ebook(file_path)
+            self.notify(message, severity="info" if success else "error")
 
     @work(exclusive=True, thread=True)
     def sync_lib_content(self, current_index: int = 0):

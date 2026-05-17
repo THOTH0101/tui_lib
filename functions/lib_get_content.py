@@ -5,7 +5,7 @@ from constant import LIB_PATH, EbookTypes
 import epub_meta
 
 from datetime import datetime
-from functions.helper_functions import is_valid_ebook
+from functions.helper_functions import format_long_str, is_valid_ebook
 from pypdf import PdfReader
 
 
@@ -92,5 +92,9 @@ def get_book_info(file_path: str) -> tuple | str:
 
     except Exception as e:
         return f"Error parsing metadata for {file_path}: {e}"
+
+    title = format_long_str(title)
+    authors = format_long_str(authors)
+    publisher = format_long_str(publisher)
 
     return title, authors, file_size_mb, publisher, published, file_path
