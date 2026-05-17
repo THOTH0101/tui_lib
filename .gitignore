@@ -10,5 +10,5 @@ wheels/
 .venv
 
 # TuiLib directory
-./TUI\ Library
-./src
+TUI\ Library
+src
