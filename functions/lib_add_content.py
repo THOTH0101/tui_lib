@@ -1,14 +1,15 @@
 import os
+from pathlib import Path
 import shutil
 import epub_meta
 import mimetypes
 
 from constant import LIB_PATH, EbookTypes
-from functions.helper_functions import is_valid_ebook
+from functions.helper_functions import is_valid_ebook, sanitize_path_part
 from pypdf import PdfReader
 
 
-def add_ebook_recursive(file_path):
+def add_ebook_recursive(file_path: str) -> str:
     if not os.path.exists(file_path):
         return f"Error: {file_path} does not exist"
 
@@ -17,51 +18,61 @@ def add_ebook_recursive(file_path):
         return add_ebook(file_path)
 
     # if it's a directory, add every file in subdirectories
-    contents = os.listdir(file_path)
-    for content in contents:
-        content_path = os.path.join(file_path, content)
+    for root, _, files in os.walk(file_path):
+        abs_root = os.path.abspath(root)
+        abs_lib = os.path.abspath(LIB_PATH)
 
-        if os.path.isfile(content_path):
-            if not is_valid_ebook(content_path):
-                continue
-            add_ebook(content_path)
-        else:
-            print(f"Directory: {content_path}")
-            add_ebook_recursive(content_path)
+        # prevent the app from recursively scanning its own destination directory!
+        if os.path.commonpath([abs_root, abs_lib]) == os.path.abspath(LIB_PATH):
+            continue
+
+        for file in files:
+            full_path = os.path.join(root, file)
+            if is_valid_ebook(full_path):
+                print(add_ebook(full_path))
+
+    return "Success: all ebook added"
 
 
-def add_ebook(file_path):
+def add_ebook(file_path: str) -> str:
     if not os.path.exists(file_path):
         return f"Error: {file_path} does not exist"
 
     mime_type, _ = mimetypes.guess_type(file_path)
+    authors = "Unknown"
+    title = "Unknown"
+    extension = ""
 
-    # add epub ebook to library directory
-    if mime_type == EbookTypes.EPUB.value:
-        meta_data = epub_meta.get_epub_metadata(file_path)
-        authors = ",".join(meta_data.authors) or "Unknown"
-        title = meta_data.title.replace("/", " ") or "Unknown"
-        dest_path = f"{LIB_PATH}/{authors}/{title}/{title} - {authors}.epub"
+    try:
+        # add epub ebook to library directory
+        if mime_type == EbookTypes.EPUB.value:
+            extension = ".epub"
+            meta_data = epub_meta.get_epub_metadata(file_path)
+            if meta_data.authors:
+                authors = (",".join(meta_data.authors)).strip()
+            if meta_data.title:
+                title = meta_data.title.strip()
+
+        # add pdf ebook to library directory
+        elif mime_type == EbookTypes.PDF.value:
+            extension = ".pdf"
+            meta_data = PdfReader(file_path).metadata
+            authors = meta_data.get("/Author", "Unknown")
+            title = meta_data.get("/Title", "Unknown")
+
+        else:
+            return "Error: invalid ebook type"
+
+        # sanitize and construct path
+        safe_author = sanitize_path_part(str(authors))
+        safe_title = sanitize_path_part(str(title))
+        final_dir = Path(LIB_PATH) / safe_author / safe_title
+        dest_path = final_dir / f"{safe_title} - {safe_author}{extension}"
 
         print(f"Copying ebook file from {file_path} to {dest_path}")
-        dir_name = os.path.dirname(dest_path)
-        if dir_name != "" and not os.path.exists(dir_name):
-            os.makedirs(dir_name)
+        final_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(file_path, dest_path)
         return f"Success: {file_path} added"
 
-    # add pdf ebook to library directory
-    if mime_type == EbookTypes.PDF.value:
-        meta_data = PdfReader(file_path).metadata
-        authors = meta_data.author or "Unknown"
-        title = meta_data.title.replace("/", " ") or "Unknown"
-        dest_path = f"{LIB_PATH}/{authors}/{title}/{title} - {authors}.pdf"
-
-        print(f"Copying ebook file from {file_path} to {dest_path}")
-        dir_name = os.path.dirname(dest_path)
-        if dir_name != "" and not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-        shutil.copy2(file_path, dest_path)
-        return f"Success: {file_path} added"
-
-    return "Error: invalid ebook type"
+    except Exception as e:
+        return f"Error processing {file_path}: {str(e)}"

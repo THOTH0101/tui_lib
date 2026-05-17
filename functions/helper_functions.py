@@ -5,34 +5,37 @@ from pathlib import Path
 from constant import LIB_PATH
 
 
-def remove_empty_dir(file_path):
-    contents = os.listdir(file_path)
-    for content in contents:
-        content_path = os.path.join(file_path, content)
-        path = Path(content_path)
-
-        # return if directory is not empty
-        if any(path.iterdir()):
-            return
-        path.rmdir()
-    path = Path(file_path)
-    path.rmdir()
+def sanitize_path_part(part: str) -> str:
+    chars_to_remove = ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]
+    for char in chars_to_remove:
+        part = part.replace(char, " ")
+    return part.strip()
 
 
-def remove_lib_empty_dirs():
-    contents = os.listdir(LIB_PATH)
-    for content in contents:
-        content_path = os.path.join(LIB_PATH, content)
-        remove_empty_dir(content_path)
+def remove_lib_empty_dirs() -> None:
+    abs_lib = os.path.abspath(LIB_PATH)
+    if not os.path.exists(abs_lib):
+        return
+
+    # process child directories before parents
+    for root, _, _ in os.walk(abs_lib, topdown=False):
+        if os.path.abspath(root) == abs_lib:
+            continue
+
+        if not os.listdir(root):
+            try:
+                os.rmdir(root)
+            except Exception as e:
+                print(f"Could not remove directory {root}: {e}")
 
 
-def is_ebook_extension(file_path):
+def is_ebook_extension(file_path: Path) -> bool:
     SUPPORTED_EXTENSIONS = {".epub", ".pdf", ".mobi", ".azw3", ".fb2"}
 
     return Path(file_path).suffix.lower() in SUPPORTED_EXTENSIONS
 
 
-def is_valid_ebook(file_path):
+def is_valid_ebook(file_path: str) -> bool:
     path = Path(file_path)
     if not is_ebook_extension(path):
         return False

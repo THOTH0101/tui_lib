@@ -1,25 +1,47 @@
-import os
+from pathlib import Path
 import shutil
 
 from constant import LIB_PATH
 from functions.helper_functions import remove_lib_empty_dirs
 
 
-def remove_ebook_recursive():
-    contents = os.listdir(LIB_PATH)
-    for content in contents:
-        content_path = os.path.join(LIB_PATH, content)
-        remove_ebook(content_path)
-    return "Success: all ebook deleted"
+def remove_ebook_recursive() -> str:
+    target_path = Path(LIB_PATH)
+
+    if not target_path.exists() or not any(target_path.iterdir()):
+        return "library is already empty"
+
+    try:
+        for item in target_path.iterdir():
+            if item.is_dir():
+                shutil.rmtree(item)
+            elif item.is_file():
+                item.unlink()
+
+        # clear up the library
+        remove_lib_empty_dirs()
+        return "Success: all ebooks deleted"
+
+    except Exception as e:
+        return f"Error clearing library: {str(e)}"
 
 
-def remove_ebook(file_path):
-    if not os.path.exists(file_path):
+def remove_ebook(file_path: str) -> str:
+    path = Path(file_path)
+
+    if not path.exists():
         return f"Error: {file_path} does not exist"
 
-    if os.path.isfile(file_path):
-        return "Error: invalid ebook record"
+    try:
+        if path.is_file():
+            path.unlink()
 
-    shutil.rmtree(file_path)
-    remove_lib_empty_dirs()
-    return "Success: ebook deleted"
+        elif path.is_dir():
+            shutil.rmtree(path)
+
+        # clear up the library
+        remove_lib_empty_dirs()
+        return "Success: ebook deleted"
+
+    except Exception as e:
+        return f"Error deleting {path.name}: {str(e)}"

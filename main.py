@@ -26,7 +26,8 @@ def main():
 
     # cli commands logic
     if args.add:
-        add_ebook_recursive(args.add)
+        message = add_ebook_recursive(args.add)
+        print(message)
         exit(0)
 
     if args.remove:
