@@ -29,13 +29,13 @@ This personal project was intended to serve as a medium to express the use of pr
 git clone https://github.com/THOTH0101/tui_lib.git
 ```
 
-1. Install dependencies in uv.lock and set up a virtual environment using the uv command:
+2. Install dependencies in uv.lock and set up a virtual environment using the uv command:
 
 ```
 uv sync
 ```
 
-1. Start the program:
+3. Start the program in TUI:
 
 ```
 uv run main.py
