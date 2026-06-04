@@ -9,10 +9,10 @@ This personal project was intended to serve as a medium to express the use of pr
 ## 🖼️ Screenshots
 
 - Lightmode
-<img width="1080" height="680" alt="app_screenshot" src="https://github.com/user-attachments/assets/aaeeaef5-8a31-4952-b76e-f46869a989bc" />
+  <img width="1080" height="680" alt="app_screenshot" src="https://github.com/user-attachments/assets/aaeeaef5-8a31-4952-b76e-f46869a989bc" />
 
 - Darkmode
-<img width="1080" height="680" alt="app_screenshot1" src="https://github.com/user-attachments/assets/2a8aa58e-f0d7-4ee7-b71f-c8b63c1cbd48" />
+  <img width="1080" height="680" alt="app_screenshot1" src="https://github.com/user-attachments/assets/2a8aa58e-f0d7-4ee7-b71f-c8b63c1cbd48" />
 
 ## ⚒ Getting Started
 
@@ -24,39 +24,56 @@ This personal project was intended to serve as a medium to express the use of pr
 ### Installation
 
 1. Clone the repo:
+
 ```
 git clone https://github.com/THOTH0101/tui_lib.git
 ```
-2. Install dependencies in uv.lock and set up a virtual environment using the uv command:
+
+1. Install dependencies in uv.lock and set up a virtual environment using the uv command:
+
 ```
 uv sync
 ```
-3. Start the program:
+
+1. Start the program:
+
 ```
 uv run main.py
 ```
 
 ### Cli Commands
+
 - To view available commands and usage
+
 ```
 uv run main.py -h
 ```
+
 - To add an ebook using the absolute path of files and folders
+
 ```
 uv run main.py --add <absolute_path>
 ```
+
 - To delete a specific ebook:
+
 ```
 uv run main.py --remove <tuilib_ebook_path>
 ```
+
 - To delete all the ebooks in the library:
+
 ```
 uv run main.py --remove_all
 ```
+
 - To list all the ebooks in the library with their author(s) and tuilib path:
+
 ```
 uv run main.py --list
 ```
+
 ---
+
 NB: the app might take a while to respond(or even look stuck) when adding ebooks via the TUI, and loading a large amount of ebooks will take time to load the UI.
 Thanks for checking out the project 👍
